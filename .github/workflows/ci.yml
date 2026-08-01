@@ -23,7 +23,10 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build native dependencies
+        run: pnpm approve-builds --all || true
 
       - name: Type check
         run: pnpm typecheck
