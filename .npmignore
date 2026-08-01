@@ -1,0 +1,8 @@
+tsup.config.ts
+vitest.config.ts
+coverage/
+*.tsbuildinfo
+.env*
+.github/
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
