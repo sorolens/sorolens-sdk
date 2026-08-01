@@ -1,0 +1,26 @@
+name: Good First Issue
+description: Suggest a good first issue for new contributors
+title: "[Good First Issue]: "
+labels: ["good first issue"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe what needs to be done.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why is this change needed? Where does it fit in the codebase?
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How will we know when this is done?
+    validations:
+      required: true
