@@ -27,6 +27,27 @@ console.log(stats.totalContracts);
 const { events } = await client.listEvents("CABC...", { limit: 20 });
 ```
 
+## CommonJS (Node.js)
+
+The package also ships a CommonJS entry point for Node.js consumers using `require()`:
+
+```javascript
+const { SorolensClient } = require("@sorolens/sdk");
+
+async function main() {
+  const client = new SorolensClient({
+    baseUrl: "https://your-sorolens-instance.example.com",
+  });
+
+  const stats = await client.getGlobalStats();
+  console.log(stats.totalContracts);
+}
+
+main();
+```
+
+Node 18+ is required for native `fetch`.
+
 ## Environment variable
 
 Set `SOROLENS_BASE_URL` and use the factory method:
