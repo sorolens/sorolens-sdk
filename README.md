@@ -92,7 +92,13 @@ Reads `SOROLENS_BASE_URL` from `process.env` and constructs the client.
 
 ## React hooks
 
-React 18+ is an optional peer dependency. Import hooks directly:
+React 18+ is an optional peer dependency. Install it alongside the SDK:
+
+```bash
+pnpm add @sorolens/sdk react
+```
+
+Import hooks directly:
 
 ```typescript
 import { useContract, useEvents, useStorage, useStats } from "@sorolens/sdk";
@@ -125,6 +131,37 @@ const { data, isLoading, error, urgentEntries } = useStorage(client, contractId)
 
 ```typescript
 const { data, isLoading, error } = useStats(client, contractId, "24h");
+```
+
+### Component example
+
+```tsx
+import { SorolensClient, useContract } from "@sorolens/sdk";
+
+const client = new SorolensClient({
+  baseUrl: "https://your-sorolens-instance.example.com",
+});
+
+export function ContractCard({ contractId }: { contractId: string }) {
+  const { data, isLoading, error, refetch } = useContract(client, contractId);
+
+  if (isLoading) {
+    return <p>Loading contract...</p>;
+  }
+
+  if (error) {
+    return (
+      <div>
+        <p>Failed to load contract.</p>
+        <button type="button" onClick={refetch}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  return <pre>{JSON.stringify(data, null, 2)}</pre>;
+}
 ```
 
 ## Error handling
