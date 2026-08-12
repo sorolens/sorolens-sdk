@@ -189,6 +189,12 @@ import { ContractSchema } from "@sorolens/sdk";
 const contract = ContractSchema.parse(rawData);
 ```
 
+## Contributors
+
+Thanks to everyone who has contributed to sorolens-sdk!
+
+[![Contributors](https://contrib.rocks/image?repo=sorolens/sorolens-sdk)](https://github.com/sorolens/sorolens-sdk/graphs/contributors)
+
 ## License
 
 MIT
