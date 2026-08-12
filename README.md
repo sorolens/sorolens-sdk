@@ -14,12 +14,22 @@ yarn add @sorolens/sdk
 
 ## Quick start
 
+Install the SDK:
+
+```bash
+pnpm add @sorolens/sdk
+```
+
+Set the API base URL, then use the factory method:
+
+```bash
+export SOROLENS_BASE_URL=https://your-sorolens-instance.example.com
+```
+
 ```typescript
 import { SorolensClient } from "@sorolens/sdk";
 
-const client = new SorolensClient({
-  baseUrl: "https://your-sorolens-instance.example.com",
-});
+const client = SorolensClient.fromEnv();
 
 const stats = await client.getGlobalStats();
 console.log(stats.totalContracts);
