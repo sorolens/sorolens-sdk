@@ -236,6 +236,87 @@ import { ContractSchema } from "@sorolens/sdk";
 const contract = ContractSchema.parse(rawData);
 ```
 
+## Testing your app (MockSorolensClient)
+
+Unit-test your own components without msw or any network layer. The mock
+mirrors the full public surface of `SorolensClient`, and every method is
+scriptable with vitest-style ergonomics while staying dependency-free:
+
+```typescript
+import { MockSorolensClient } from "@sorolens/sdk/testing";
+// also re-exported from the root: import { MockSorolensClient } from "@sorolens/sdk";
+
+const mock = new MockSorolensClient();
+mock.getGlobalStats.mockResolvedValueOnce({ ...globalStats });
+mock.listEvents
+  .mockResolvedValueOnce({ events: [event], nextCursor: "" })
+  .mockRejectedValueOnce(new SorolensError("rate limited"));
+
+// Calls with nothing scripted fail loudly instead of returning undefined:
+await expect(mock.getContract("x")).rejects.toThrow(/no scripted response/);
+```
+
+Queue semantics per method: `mockResolvedValueOnce` / `mockRejectedValueOnce`
+are consumed FIFO first; once drained, the sticky `mockResolvedValue` /
+`mockRejectedValue` / `mockImplementation` takes over; with neither queued,
+the call throws. `pollEvents` owns its own independent queue rather than
+deriving from `listEvents`, so polling sequences can be scripted directly.
+`mockReset()` clears everything.
+
+## Svelte & Vue
+
+The React hooks have framework-native twins behind optional sub-paths —
+install only what you use (both are optional peers; `react` stays optional
+too):
+
+```bash
+pnpm add @sorolens/sdk svelte     # or: vue
+```
+
+**Svelte** (`@sorolens/sdk/svelte`) — each value is a readable store plus a
+`refetch()` escape hatch; prefix with `$` in templates:
+
+```svelte
+<script lang="ts">
+  import { SorolensClient } from "@sorolens/sdk";
+  import { useContract } from "@sorolens/sdk/svelte";
+
+  const client = SorolensClient.fromEnv();
+  const contract = useContract(client, "CAAAAAAAAA…");
+</script>
+
+{#if $contract.isLoading}Loading…{:else if $contract.error}{$contract.error.message}{:else}
+  {$contract.data?.alias}
+{/if}
+```
+
+Also available: `useEvents(client, contractId, options?)`,
+`useStorage(client, contractId)`.
+
+**Vue 3** (`@sorolens/sdk/vue`) — composables returning `{ data, isLoading,
+error, refetch }`, fetching on mount:
+
+```vue
+<script setup lang="ts">
+import { SorolensClient } from "@sorolens/sdk";
+import { useContract } from "@sorolens/sdk/vue";
+
+const client = SorolensClient.fromEnv();
+const { data, isLoading, error, refetch } = useContract(client, "CAAAAAAAAA…");
+</script>
+
+<template>
+  <span v-if="isLoading">Loading…</span>
+  <span v-else-if="error">{{ error.message }}</span>
+  <span v-else>{{ data?.alias }}</span>
+</template>
+```
+
+Both wrappers share the exact state shape and stale-response token guard of
+the React hooks, so behaviour is identical across frameworks. Sub-path
+resolution is smoke-tested against the built `dist/` output in this repo's
+CI.
+
 ## Contributors
 
 Thanks to everyone who has contributed to sorolens-sdk!
