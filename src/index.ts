@@ -34,3 +34,9 @@ export type { UseStorageResult } from "./hooks/useStorage.js";
 
 export { useStats } from "./hooks/useStats.js";
 export type { UseStatsResult } from "./hooks/useStats.js";
+
+export { createPoller } from "./polling.js";
+export type { PollerHandle, CreatePollerOptions } from "./polling.js";
+
+export { usePolling } from "./hooks/usePolling.js";
+export type { UsePollingOptions } from "./hooks/usePolling.js";
