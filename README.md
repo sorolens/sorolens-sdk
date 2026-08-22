@@ -236,6 +236,33 @@ import { ContractSchema } from "@sorolens/sdk";
 const contract = ContractSchema.parse(rawData);
 ```
 
+## Testing your app (MockSorolensClient)
+
+Unit-test your own components without msw or any network layer. The mock
+mirrors the full public surface of `SorolensClient`, and every method is
+scriptable with vitest-style ergonomics while staying dependency-free:
+
+```typescript
+import { MockSorolensClient } from "@sorolens/sdk/testing";
+// also re-exported from the root: import { MockSorolensClient } from "@sorolens/sdk";
+
+const mock = new MockSorolensClient();
+mock.getGlobalStats.mockResolvedValueOnce({ ...globalStats });
+mock.listEvents
+  .mockResolvedValueOnce({ events: [event], nextCursor: "" })
+  .mockRejectedValueOnce(new SorolensError("rate limited"));
+
+// Calls with nothing scripted fail loudly instead of returning undefined:
+await expect(mock.getContract("x")).rejects.toThrow(/no scripted response/);
+```
+
+Queue semantics per method: `mockResolvedValueOnce` / `mockRejectedValueOnce`
+are consumed FIFO first; once drained, the sticky `mockResolvedValue` /
+`mockRejectedValue` / `mockImplementation` takes over; with neither queued,
+the call throws. `pollEvents` owns its own independent queue rather than
+deriving from `listEvents`, so polling sequences can be scripted directly.
+`mockReset()` clears everything.
+
 ## Contributors
 
 Thanks to everyone who has contributed to sorolens-sdk!
