@@ -1,6 +1,14 @@
 # @sorolens/sdk
 
-TypeScript SDK for querying Soroban contract history via the Sorolens REST API.
+TypeScript SDK for querying Soroban contract history and on-chain watchdog monitoring via the Sorolens REST API.
+
+## Features
+
+- Query indexed contracts, events, invocations, and storage
+- Fetch contract-level and global aggregate stats
+- **Watchdog monitoring** — inspect on-chain health checks and alerts for contracts registered with the Sorolens Watchdog Soroban contract
+- Zod schemas exported for runtime validation
+- Optional React hooks for both the core API and the watchdog vertical
 
 ## Installation
 
@@ -117,6 +125,34 @@ Returns all current storage entries for the contract.
 
 Convenience method that fetches the 50 most recent events.
 
+### Watchdog methods
+
+Sorolens Watchdog monitors contract health on-chain. These methods surface the watchdog vertical over the REST API.
+
+#### `getWatchdogStats(): Promise<WatchdogStats>`
+
+Returns platform-wide watchdog counts (total monitored, healthy/degraded/unresponsive, total and critical alerts).
+
+#### `getMonitoredContracts(cursor?): Promise<{ contracts: MonitoredContract[], next_cursor: string | null }>`
+
+Returns the paginated list of contracts under active watchdog monitoring.
+
+#### `getMonitoredContract(contractId): Promise<MonitoredContract>`
+
+Returns a single monitored contract's registration and current status.
+
+#### `getHealthHistory(contractId, limit?): Promise<HealthCheck[]>`
+
+Returns recent health check records for the contract.
+
+#### `getContractAlerts(contractId, options?): Promise<ContractAlert[]>`
+
+Options: `{ severity?: "Info" | "Warning" | "Critical", limit?: number }`.
+
+#### `getAllAlerts(options?): Promise<ContractAlert[]>`
+
+Options: `{ severity? }`. Returns alerts across every monitored contract.
+
 #### `SorolensClient.fromEnv(): SorolensClient`
 
 Reads `SOROLENS_BASE_URL` from `process.env` and constructs the client.
@@ -162,6 +198,80 @@ const { data, isLoading, error, urgentEntries } = useStorage(client, contractId)
 
 ```typescript
 const { data, isLoading, error } = useStats(client, contractId, "24h");
+```
+
+### Watchdog hooks
+
+```typescript
+import {
+  useWatchdogStats,
+  useMonitoredContracts,
+  useContractHealth,
+  useAlerts,
+} from "@sorolens/sdk";
+```
+
+#### `useWatchdogStats(client)`
+
+```typescript
+const { stats, isLoading, error, refetch } = useWatchdogStats(client);
+```
+
+#### `useMonitoredContracts(client)`
+
+```typescript
+const { contracts, isLoading, error, refetch } = useMonitoredContracts(client);
+```
+
+#### `useContractHealth(client, contractId, options?)`
+
+```typescript
+const { contract, healthHistory, isLoading, error, refetch } =
+  useContractHealth(client, contractId, { refreshInterval: 15000 });
+```
+
+Auto-refreshes every `refreshInterval` ms (default `30000`). Set `refreshInterval: 0` to disable polling. The interval is cleared on unmount.
+
+#### `useAlerts(client, contractId?, options?)`
+
+Omit `contractId` to fetch alerts across every monitored contract.
+
+```typescript
+const { alerts, isLoading, error, refetch } = useAlerts(client, contractId, {
+  severity: "Critical",
+});
+```
+
+### Watchdog component example
+
+```tsx
+import { SorolensClient, useContractHealth, useAlerts } from "@sorolens/sdk";
+
+const client = new SorolensClient({
+  baseUrl: "https://your-sorolens-instance.example.com",
+});
+
+export function ContractMonitor({ contractId }: { contractId: string }) {
+  const { contract, healthHistory, isLoading } = useContractHealth(
+    client,
+    contractId,
+    { refreshInterval: 15000 }
+  );
+  const { alerts } = useAlerts(client, contractId, { severity: "Critical" });
+
+  if (isLoading) return <div>Loading...</div>;
+  if (!contract) return <div>Contract not found</div>;
+
+  return (
+    <div>
+      <h2>{contract.name}</h2>
+      <p>Status: {contract.status}</p>
+      <p>Last check: {contract.last_check}</p>
+      <p>History entries: {healthHistory.length}</p>
+      <p>Critical alerts: {alerts.length}</p>
+    </div>
+  );
+}
 ```
 
 ### Component example
@@ -225,6 +335,12 @@ import type {
   Invocation,
   StorageEntry,
   ContractStats,
+  MonitoredContract,
+  HealthCheck,
+  ContractAlert,
+  WatchdogStats,
+  HealthStatus,
+  AlertSeverity,
 } from "@sorolens/sdk";
 ```
 

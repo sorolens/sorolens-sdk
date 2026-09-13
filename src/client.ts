@@ -1,19 +1,29 @@
 import type { ZodType } from "zod";
 import { SorolensError } from "./errors.js";
 import {
+  AlertSeverity,
+  AlertsResponseSchema,
   Contract,
+  ContractAlert,
   ContractEvent,
   ContractStats,
   ContractStatsSchema,
   ContractSchema,
   GlobalStats,
   GlobalStatsSchema,
+  HealthCheck,
+  HealthChecksResponseSchema,
   Invocation,
   ListContractsResponseSchema,
   ListEventsResponseSchema,
   ListInvocationsResponseSchema,
+  MonitoredContract,
+  MonitoredContractSchema,
+  MonitoredContractsResponseSchema,
   StorageEntry,
   StorageEntrySchema,
+  WatchdogStats,
+  WatchdogStatsSchema,
 } from "./types.js";
 
 export interface SorolensClientOptions {
@@ -194,5 +204,64 @@ export class SorolensClient {
   async pollEvents(contractId: string): Promise<ContractEvent[]> {
     const result = await this.listEvents(contractId, { limit: 50 });
     return result.events;
+  }
+
+  async getWatchdogStats(): Promise<WatchdogStats> {
+    return this.request("/api/v1/watchdog/stats", WatchdogStatsSchema);
+  }
+
+  async getMonitoredContracts(
+    cursor?: string
+  ): Promise<{ contracts: MonitoredContract[]; next_cursor: string | null }> {
+    const qs = this.buildQuery({ cursor });
+    return this.request(
+      `/api/v1/watchdog/contracts${qs}`,
+      MonitoredContractsResponseSchema
+    );
+  }
+
+  async getMonitoredContract(contractId: string): Promise<MonitoredContract> {
+    return this.request(
+      `/api/v1/watchdog/contracts/${encodeURIComponent(contractId)}`,
+      MonitoredContractSchema
+    );
+  }
+
+  async getHealthHistory(
+    contractId: string,
+    limit?: number
+  ): Promise<HealthCheck[]> {
+    const qs = this.buildQuery({ limit });
+    const result = await this.request(
+      `/api/v1/watchdog/contracts/${encodeURIComponent(contractId)}/health${qs}`,
+      HealthChecksResponseSchema
+    );
+    return result.health_checks;
+  }
+
+  async getContractAlerts(
+    contractId: string,
+    options?: { severity?: AlertSeverity; limit?: number }
+  ): Promise<ContractAlert[]> {
+    const qs = this.buildQuery({
+      severity: options?.severity,
+      limit: options?.limit,
+    });
+    const result = await this.request(
+      `/api/v1/watchdog/contracts/${encodeURIComponent(contractId)}/alerts${qs}`,
+      AlertsResponseSchema
+    );
+    return result.alerts;
+  }
+
+  async getAllAlerts(options?: {
+    severity?: AlertSeverity;
+  }): Promise<ContractAlert[]> {
+    const qs = this.buildQuery({ severity: options?.severity });
+    const result = await this.request(
+      `/api/v1/watchdog/alerts${qs}`,
+      AlertsResponseSchema
+    );
+    return result.alerts;
   }
 }

@@ -1,10 +1,14 @@
 import type {
   Contract,
+  ContractAlert,
   ContractEvent,
   ContractStats,
   GlobalStats,
+  HealthCheck,
   Invocation,
+  MonitoredContract,
   StorageEntry,
+  WatchdogStats,
 } from "../../src/types.js";
 
 export const BASE_URL = "http://localhost:8080";
@@ -61,6 +65,44 @@ export const storageEntry: StorageEntry = {
   lastModifiedLedger: 999,
   lastModifiedAt: "2024-01-01T00:00:00Z",
   isUrgent: false,
+};
+
+export const monitoredContract: MonitoredContract = {
+  contract_id: CONTRACT_ID,
+  name: "MyToken",
+  owner: "GABC123",
+  status: "Healthy",
+  last_check: "2024-01-01T00:00:00Z",
+  check_interval: 60,
+  registered_at: "2024-01-01T00:00:00Z",
+  updated_at: "2024-01-01T00:00:00Z",
+};
+
+export const healthCheck: HealthCheck = {
+  contract_id: CONTRACT_ID,
+  status: "Healthy",
+  metadata: null,
+  ledger: 1000,
+  tx_hash: "abc123",
+  timestamp: "2024-01-01T00:00:00Z",
+};
+
+export const contractAlert: ContractAlert = {
+  contract_id: CONTRACT_ID,
+  severity: "Critical",
+  message: "Contract unresponsive",
+  ledger: 1000,
+  tx_hash: "abc123",
+  timestamp: "2024-01-01T00:00:00Z",
+};
+
+export const watchdogStats: WatchdogStats = {
+  total_monitored: 5,
+  healthy: 3,
+  degraded: 1,
+  unresponsive: 1,
+  total_alerts: 7,
+  critical_alerts: 2,
 };
 
 export const contractStats: ContractStats = {

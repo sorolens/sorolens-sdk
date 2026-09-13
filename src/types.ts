@@ -90,3 +90,67 @@ export const ListInvocationsResponseSchema = z.object({
   invocations: z.array(InvocationSchema),
   nextCursor: z.string(),
 });
+
+export const HealthStatusSchema = z.union([
+  z.enum(["Healthy", "Degraded", "Unresponsive"]),
+  z.string(),
+]);
+export type HealthStatus = z.infer<typeof HealthStatusSchema>;
+
+export const AlertSeveritySchema = z.enum(["Info", "Warning", "Critical"]);
+export type AlertSeverity = z.infer<typeof AlertSeveritySchema>;
+
+export const MonitoredContractSchema = z.object({
+  contract_id: z.string(),
+  name: z.string(),
+  owner: z.string(),
+  status: HealthStatusSchema,
+  last_check: z.string(),
+  check_interval: z.number(),
+  registered_at: z.string(),
+  updated_at: z.string(),
+});
+export type MonitoredContract = z.infer<typeof MonitoredContractSchema>;
+
+export const HealthCheckSchema = z.object({
+  contract_id: z.string(),
+  status: HealthStatusSchema,
+  metadata: z.string().nullable(),
+  ledger: z.number(),
+  tx_hash: z.string(),
+  timestamp: z.string(),
+});
+export type HealthCheck = z.infer<typeof HealthCheckSchema>;
+
+export const ContractAlertSchema = z.object({
+  contract_id: z.string(),
+  severity: AlertSeveritySchema,
+  message: z.string(),
+  ledger: z.number(),
+  tx_hash: z.string(),
+  timestamp: z.string(),
+});
+export type ContractAlert = z.infer<typeof ContractAlertSchema>;
+
+export const WatchdogStatsSchema = z.object({
+  total_monitored: z.number(),
+  healthy: z.number(),
+  degraded: z.number(),
+  unresponsive: z.number(),
+  total_alerts: z.number(),
+  critical_alerts: z.number(),
+});
+export type WatchdogStats = z.infer<typeof WatchdogStatsSchema>;
+
+export const MonitoredContractsResponseSchema = z.object({
+  contracts: z.array(MonitoredContractSchema),
+  next_cursor: z.string().nullable(),
+});
+
+export const HealthChecksResponseSchema = z.object({
+  health_checks: z.array(HealthCheckSchema),
+});
+
+export const AlertsResponseSchema = z.object({
+  alerts: z.array(ContractAlertSchema),
+});
