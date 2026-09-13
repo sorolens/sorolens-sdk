@@ -13,6 +13,15 @@ export {
   ListContractsResponseSchema,
   ListEventsResponseSchema,
   ListInvocationsResponseSchema,
+  HealthStatusSchema,
+  AlertSeveritySchema,
+  MonitoredContractSchema,
+  HealthCheckSchema,
+  ContractAlertSchema,
+  WatchdogStatsSchema,
+  MonitoredContractsResponseSchema,
+  HealthChecksResponseSchema,
+  AlertsResponseSchema,
 } from "./types.js";
 export type {
   GlobalStats,
@@ -21,6 +30,12 @@ export type {
   Invocation,
   StorageEntry,
   ContractStats,
+  HealthStatus,
+  AlertSeverity,
+  MonitoredContract,
+  HealthCheck,
+  ContractAlert,
+  WatchdogStats,
 } from "./types.js";
 
 export { useContract } from "./hooks/useContract.js";
@@ -34,3 +49,18 @@ export type { UseStorageResult } from "./hooks/useStorage.js";
 
 export { useStats } from "./hooks/useStats.js";
 export type { UseStatsResult } from "./hooks/useStats.js";
+
+export { useMonitoredContracts } from "./hooks/useMonitoredContracts.js";
+export type { UseMonitoredContractsResult } from "./hooks/useMonitoredContracts.js";
+
+export { useContractHealth } from "./hooks/useContractHealth.js";
+export type {
+  UseContractHealthOptions,
+  UseContractHealthResult,
+} from "./hooks/useContractHealth.js";
+
+export { useAlerts } from "./hooks/useAlerts.js";
+export type { UseAlertsOptions, UseAlertsResult } from "./hooks/useAlerts.js";
+
+export { useWatchdogStats } from "./hooks/useWatchdogStats.js";
+export type { UseWatchdogStatsResult } from "./hooks/useWatchdogStats.js";
